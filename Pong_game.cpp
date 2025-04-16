@@ -13,7 +13,7 @@ float leftPaddleY = HEIGHT / 2 - PADDLE_HEIGHT / 2;
 float rightPaddleY = HEIGHT / 2 - PADDLE_HEIGHT / 2;
 
 // Ball properties
-float ballX = WIDTH / 2;
+float ballX = WIDTH / 2;	
 float ballY = HEIGHT / 2;
 float ballRadius = 8;
 float ballSpeedX = 4;
@@ -141,7 +141,7 @@ void display() {
     ss << scoreLeft << "                    " << scoreRight;
     drawText(WIDTH / 2 - 60, HEIGHT - 30, ss.str());
 
-    // Draw paused status
+    // Paused status
     if (paused)
         drawText(WIDTH / 2 - 40, HEIGHT / 2, "PAUSED");
 
