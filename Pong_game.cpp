@@ -1,6 +1,6 @@
 #include <GL/glut.h>
 #include <iostream>
-#include <sstream> // For score display
+#include <sstream>
 
 // Window size
 const int WIDTH = 640;
@@ -127,16 +127,16 @@ void updatePaddles() {
 
 void display() {
     glClear(GL_COLOR_BUFFER_BIT);
-	// Draw Border
+	// Border
 	drawBorder();
-    // Draw paddles
+    // Paddles
     drawRect(10, leftPaddleY, PADDLE_WIDTH, PADDLE_HEIGHT);
     drawRect(WIDTH - 20, rightPaddleY, PADDLE_WIDTH, PADDLE_HEIGHT);
 
-    // Draw ball
+    // Ball
     drawRect(ballX, ballY, ballRadius, ballRadius);
 
-    // Draw score
+    // Score
     std::stringstream ss;
     ss << scoreLeft << "                    " << scoreRight;
     drawText(WIDTH / 2 - 60, HEIGHT - 30, ss.str());
