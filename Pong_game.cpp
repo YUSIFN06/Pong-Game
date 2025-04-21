@@ -60,10 +60,6 @@ void drawStartScreen() {
 	drawText(WIDTH / 2 - 60, HEIGHT / 2, "Press Space to start");
 }
 
-void timer() {
-	
-}
-
 void drawBorder() {
     glColor3f(1.0f, 1.0f, 0.0f);
     glLineWidth(10);
