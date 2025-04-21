@@ -34,7 +34,7 @@ bool gameStarted = false;
 bool gameOver = false;
 
 // Timer variables
-int gameTime = 10;
+int gameTime = 60;
 int timeLeft = gameTime;
 time_t startTime;
 
