@@ -1,6 +1,7 @@
 #include <GL/glut.h>
 #include <iostream>
 #include <sstream>
+#include <ctime>
 
 // Window size
 const int WIDTH = 640;
@@ -28,6 +29,40 @@ bool moveUpLeft = false, moveDownLeft = false;
 bool moveUpRight = false, moveDownRight = false;
 bool paused = false;
 bool aiEnabled = true; // AI for right paddle
+
+bool gameStarted = false;
+bool gameOver = false;
+
+// Timer variables
+int gameTime = 10;
+int timeLeft = gameTime;
+time_t startTime;
+
+void drawText(float x, float y, std::string text) {
+	glColor3f(1.0f, 1.0f, 1.0f);
+    glRasterPos2f(x, y);
+    for (int i = 0; i < text.length(); ++i) {
+        glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, text[i]);
+    }
+}
+
+void drawGameOverScreen() {
+	std::string winner;
+	if (scoreLeft > scoreRight) winner = "Player 1 Wins!";
+	else if (scoreLeft < scoreRight && !aiEnabled) winner = "Player 2 Wins!";
+	else if (scoreLeft < scoreRight && aiEnabled) winner = "You Lose!";
+	else winner = "It is a tie!";
+	drawText(WIDTH / 2 - 40, HEIGHT / 2, winner);
+	drawText(WIDTH / 2 - 40, HEIGHT / 2 + 40, "Game Over");
+}
+
+void drawStartScreen() {
+	drawText(WIDTH / 2 - 60, HEIGHT / 2, "Press Space to start");
+}
+
+void timer() {
+	
+}
 
 void drawBorder() {
     glColor3f(1.0f, 1.0f, 0.0f);
@@ -62,14 +97,6 @@ void drawRect(float x, float y, float w, float h) {
     glEnd();
 }
 
-void drawText(float x, float y, std::string text) {
-	glColor3f(1.0f, 1.0f, 1.0f);
-    glRasterPos2f(x, y);
-    for (int i = 0; i < text.length(); ++i) {
-        glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, text[i]);
-    }
-}
-
 void resetBall() {
     ballX = WIDTH / 2;
     ballY = HEIGHT / 2;
@@ -78,7 +105,7 @@ void resetBall() {
 }
 
 void updateBall() {
-    if (paused) return;
+    if (paused || gameOver) return;
 
     ballX += ballSpeedX;
     ballY += ballSpeedY;
@@ -105,7 +132,7 @@ void updateBall() {
 }
 
 void updatePaddles() {
-    if (paused) return;
+    if (paused || gameOver) return;
 
     if (moveUpLeft && leftPaddleY > 0)
         leftPaddleY -= 5;
@@ -129,6 +156,14 @@ void display() {
     glClear(GL_COLOR_BUFFER_BIT);
 	// Border
 	drawBorder();
+	
+	// Game not started yet
+	if (!gameStarted) {
+		drawStartScreen();
+		glutSwapBuffers();
+		return;
+	}
+	
     // Paddles
     drawRect(10, leftPaddleY, PADDLE_WIDTH, PADDLE_HEIGHT);
     drawRect(WIDTH - 20, rightPaddleY, PADDLE_WIDTH, PADDLE_HEIGHT);
@@ -140,15 +175,54 @@ void display() {
     std::stringstream ss;
     ss << scoreLeft << "                    " << scoreRight;
     drawText(WIDTH / 2 - 60, HEIGHT - 30, ss.str());
+    
+    // Timer
+	std::stringstream ts;
+	ts << "Time Left: " << timeLeft << "s";
+	drawText(10, HEIGHT - 30, ts.str());
 
     // Paused status
     if (paused)
         drawText(WIDTH / 2 - 40, HEIGHT / 2, "PAUSED");
+    
+    // Game Over Screen
+    if (gameOver) {
+		drawGameOverScreen();
+		drawText(WIDTH / 2 - 80, HEIGHT / 2 - 40, "Press 'R' to Restart");
+	}
 
     glutSwapBuffers();
 }
 
+void restartGame() {
+    // Reset scores
+    scoreLeft = 0;
+    scoreRight = 0;
+
+    // Reset paddle positions
+    leftPaddleY = HEIGHT / 2 - PADDLE_HEIGHT / 2;
+    rightPaddleY = HEIGHT / 2 - PADDLE_HEIGHT / 2;
+
+    // Reset ball
+    resetBall();
+
+    // Reset flags
+    paused = false;
+    gameOver = false;
+
+    // Restart timer
+    startTime = time(NULL);
+}
+
 void timer(int) {
+	if (gameStarted && !paused && !gameOver) {
+		timeLeft = gameTime - (int)(time(NULL) - startTime);
+		if (timeLeft <= 0) {
+			gameOver = true;
+			timeLeft = 0;
+		}
+	}
+	
     updatePaddles();
     updateBall();
 
@@ -164,6 +238,14 @@ void keyPressed(unsigned char key, int x, int y) {
         case 'k': moveDownRight = true; break;
         case 'm': paused = !paused; break;
         case 'a': aiEnabled = !aiEnabled; break;
+        case 32: // Space key to start the game
+		if (!gameStarted) {
+			gameStarted = true;
+			startTime = time(NULL);
+			timeLeft = gameTime;
+		}
+		break;
+		case 'r': restartGame(); break;
     }
 }
 
